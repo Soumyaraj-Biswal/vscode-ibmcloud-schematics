@@ -15,7 +15,7 @@
             "lineitemtotal": 0,
             "currlineitemtotal": 0,
             "prevlineitemtotal": 0,
-            "changelineitemtotal": 0,
+            "changelineitemtotal": 1,
             "depends": null
         }
     ]
