@@ -16,24 +16,29 @@
  */
 
 import * as vscode from 'vscode';
-import { estimateCost } from '../../command/shell/terraform/index';
+import  EstimateCostTerminal  from './estimateCostTerminal';
 import EstimateCostView from '../../webview/workspace/EstimateCostView';
+import { Terminal } from '../../util/terminal';
 
 export async function cost(context: vscode.ExtensionContext): Promise<void> {
     try {
-            const writeEmitter = new vscode.EventEmitter<string>();
-            const closeEmitter = new vscode.EventEmitter<number>();
-            const pty = {
-                onDidWrite: writeEmitter.event,
-                onDidClose: closeEmitter.event,
-                open: async() => {
-                    await estimateCost(writeEmitter,closeEmitter).then(async (r)=>{
-                        await new EstimateCostView(context).openView(false);
-                    });
-                },
-                close: () => {}
-            };
-            await (<any>vscode.window).createTerminal({ pty }).show();
+        await  EstimateCostTerminal().then(async ()=>{
+                            await new EstimateCostView(context).openView(false);
+                        });
+                    
+        // var execution = new vscode.CustomExecution(
+        //     async (): Promise<vscode.Pseudoterminal> => new EstimateCostTerminal()
+        // );
+        //     const pty = {
+        //         open: async() => {
+
+        //             await  Promise<vscode.Pseudoterminal> => EstimateCostTerminal().then(async ()=>{
+        //                 await new EstimateCostView(context).openView(false);
+        //             });
+        //         },
+        //         close: () => {}
+        //     };
+        //     await (<any>vscode.window).createTerminal({ pty }).show();
         }
     catch(error){
         console.log(error);
