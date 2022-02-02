@@ -32,8 +32,7 @@ export async function execute(cmd: string): Promise<string | Error> {
     return stdout;
 }
 
-export function exportAPIKey(key: string, value: string): Promise<string | Error> {
-    const TERRAFORM_API_COMMAND = 'IC_API_KEY=';
+export function exportVariables(key: string, value: string): Promise<string | Error> {
 
     var API_EXPORT_COMMAND = `set ${key}=${value}`;
     if (os.platform() === 'darwin' || os.platform() === 'linux'){

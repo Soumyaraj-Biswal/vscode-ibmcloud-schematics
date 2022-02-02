@@ -47,7 +47,7 @@ export function calculateTFCost(): Promise<string | Error> {
     return shell.execute(`tfcost plan .vscode-ibmcloud-schematics/${util.workspace.getWorkspaceName()}.json --json`);
 }
 
-export function createJSON(): Promise<string | Error> {
+export function convertPlanToJSON(): Promise<string | Error> {
     const folderName = util.workspace.getWorkspaceName();
     return shell.execute(`terraform show -json .vscode-ibmcloud-schematics/${folderName}.binary > .vscode-ibmcloud-schematics/${folderName}.json`);
 }
