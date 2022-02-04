@@ -17,15 +17,13 @@
 
 import * as shell from '..';
 import * as util from '../../../util';
-import { path } from '../../../util/workspace';
 var os = require('os');
-import { Terminal } from '../../../util/terminal';
 
 
 const TERRAFORM_INIT_COMMAND = 'terraform init';
 const TERRAFORM_VALIDATE_COMMAND = 'terraform validate';
 const TERRAFORM_VERSION_COMMAND = 'terraform -version';
-const FIND_AND_UPGRADE = '. -name "*.tf" -printf "%h\n" | uniq | sort -ur | xargs -n1 terraform 0.12upgrade -yes';
+
 const hcltojson = require('hcl-to-json');
 
 export function init(): Promise<string | Error> {
@@ -54,8 +52,13 @@ export function convertPlanToJSON(): Promise<string | Error> {
 
 
 
-export async function upgrade(): Promise<string | Error> {
+export async function upgradeTerraformVersion(version: string): Promise<string | Error> {
     var EXEC_COMMAND_TF_MAC;
+    if(!["0.12","0.13"].find(v => (version === v))){
+        throw new Error("invalid version");
+    }
+    var FIND_AND_UPGRADE = `. -name "*.tf" -printf "%h\n" | uniq | sort -ur | xargs -n1 terraform ${version}upgrade -yes`;
+
     if (os.platform() === 'darwin'){
         EXEC_COMMAND_TF_MAC='gfind '+FIND_AND_UPGRADE;
     }
