@@ -17,16 +17,19 @@
 
 import * as shell from '..';
 import * as util from '../../../util';
-import { path } from '../../../util/workspace';
 var os = require('os');
-import { Terminal } from '../../../util/terminal';
+import {getSecureDirectoryPath } from '../../../util/workspace';
 
+var secureDirectory = getSecureDirectoryPath();
 
 const TERRAFORM_INIT_COMMAND = 'terraform init';
 const TERRAFORM_VALIDATE_COMMAND = 'terraform validate';
 const TERRAFORM_VERSION_COMMAND = 'terraform -version';
 const FIND_AND_UPGRADE = '. -name "*.tf" -printf "%h\n" | uniq | sort -ur | xargs -n1 terraform 0.12upgrade -yes';
 const hcltojson = require('hcl-to-json');
+const TERRAFORM_PLAN = `terraform plan --out ${getSecureDirectoryPath()}/plan.binary`;
+const TERRAFORM_COST_COMMAND = `tfcost plan ${getSecureDirectoryPath()}/plan.json --json`;
+const TERRAFORM_PLAN_TO_JSON = `terraform show -json ${getSecureDirectoryPath()}/plan.binary > ${getSecureDirectoryPath()}/plan.json`;
 
 export function init(): Promise<string | Error> {
     return shell.execute(TERRAFORM_INIT_COMMAND);
@@ -40,25 +43,23 @@ export function checkVersion(): Promise<string | Error> {
 }
 
 export function createPlan(): Promise<string | Error> {
-    return shell.execute(`terraform plan --out .vscode-ibmcloud-schematics/${util.workspace.getWorkspaceName()}.binary`);
+    return shell.execute(TERRAFORM_PLAN);
 }
 
 export function calculateTFCost(key: string): Promise<string | Error> {
     const apikey = 'IC_API_KEY=';
-    const TERRAFORM_COST_COMMAND = `tfcost plan .vscode-ibmcloud-schematics/${util.workspace.getWorkspaceName()}.json --json`;
-    var COST_COMMAND: string;
+    var costCommand: string;
     if (os.platform() === 'darwin' || os.platform() === 'linux'){
-        COST_COMMAND = `export ${apikey}${key} && ${TERRAFORM_COST_COMMAND}`;
+        costCommand = `export ${apikey}${key} && ${TERRAFORM_COST_COMMAND}`;
     }
     else{
-        COST_COMMAND = `set "${apikey}${key}" & call ${TERRAFORM_COST_COMMAND}`;
+        costCommand = `set "${apikey}${key}" & call ${TERRAFORM_COST_COMMAND}`;
     }
-    return shell.execute(COST_COMMAND);
+    return shell.execute(costCommand);
 }
 
 export function convertPlanToJSON(): Promise<string | Error> {
-    const folderName = util.workspace.getWorkspaceName();
-    return shell.execute(`terraform show -json .vscode-ibmcloud-schematics/${folderName}.binary > .vscode-ibmcloud-schematics/${folderName}.json`);
+    return shell.execute(TERRAFORM_PLAN_TO_JSON);
 }
 
 
